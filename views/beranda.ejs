@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beranda - Marketplace Sederhana</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .slider {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      border-radius: 8px; /* Rounded corners */
+    }
+
+    .slides {
+      display: flex;
+      transition: transform 0.5s ease, opacity 0.5s ease; /* Transisi lebih halus */
+      width: 100%;
+    }
+
+    .slide {
+      min-width: 100%;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      position: relative; /* Untuk penempatan gambar */
+      background: linear-gradient(135deg, rgb(35, 196, 35), rgb(3, 179, 91)); 
+      background-size: cover; /* Menjaga ukuran latar belakang */
+    }
+
+    .slide img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Menjaga aspek rasio gambar */
+      opacity: 0.5; /* Menambahkan efek transparan */
+      border-radius: 8px; /* Rounded corners */
+    }
+
+    .slide-text {
+      position: relative;
+      z-index: 1; /* Menempatkan teks di atas gambar */
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); /* Bayangan teks */
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s; /* Transisi halus untuk hover */
+    }
+
+    .button:hover {
+      background-color: #45a049;
+    }
+
+    .indicator-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .indicator {
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+      background-color: #bbb;
+      margin: 0 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .active {
+      background-color: #4CAF50; /* Warna indikator aktif */
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 1rem;
+    }
+
+    .card p:last-child {
+      font-weight: bold;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <%- include('navbar.ejs') %>
+
+  <div class="container">
+    <!-- Slider -->
+    <div class="slider">
+      <div class="slides">
+        <div class="slide">
+          <div class="slide-text"><h1>Diskon 20% untuk Semua Barang!</h1></div>
+        </div>
+        <div class="slide">
+          <div class="slide-text"><h1>Promo Beli 1 Gratis 1!</h1></div>
+        </div>
+        <div class="slide">
+          <div class="slide-text"><h1>Free Ongkir untuk Pembelian di Atas Rp 500.000!</h1></div>
+        </div>
+      </div>
+      <div class="button-container">
+        <button class="button" id="prevSlide">❮ Prev</button>
+        <button class="button" id="nextSlide">Next ❯</button>
+      </div>
+      <div class="indicator-container">
+        <div class="indicator active"></div>
+        <div class="indicator"></div>
+        <div class="indicator"></div>
+      </div>
+    </div>
+
+    <!-- Card Produk -->
+    <h2>Produk Unggulan</h2>
+    <div class="product-grid">
+      <% products.forEach(product => { %>
+        <div class="card">
+          <img src="<%= product.image %>" alt="<%= product.name %>">
+          <h2><%= product.name %></h2>
+          <p><%= product.description %></p>
+          <p>Harga: Rp <%= product.price.toLocaleString() %></p>
+          <p>Stok: <%= product.stok %></p>
+        </div>        
+      <% }) %>
+    </div>
+  </div>
+
+  <script>
+    const slides = document.querySelector('.slides');
+    const slideCount = document.querySelectorAll('.slide').length;
+    let currentIndex = 0;
+
+    function showSlide(index) {
+      if (index >= slideCount) {
+        currentIndex = 0;
+      } else if (index < 0) {
+        currentIndex = slideCount - 1;
+      }
+      const offset = -currentIndex * 100; // Hitung offset
+      slides.style.transform = `translateX(${offset}%)`;
+
+      // Update indikator
+      document.querySelectorAll('.indicator').forEach((indicator, idx) => {
+        indicator.classList.toggle('active', idx === currentIndex);
+      });
+    }
+
+    document.getElementById('nextSlide').addEventListener('click', function() {
+      currentIndex++;
+      showSlide(currentIndex);
+    });
+
+    document.getElementById('prevSlide').addEventListener('click', function() {
+      currentIndex--;
+      showSlide(currentIndex);
+    });
+
+    // Auto slide setiap 5 detik
+    setInterval(() => {
+      currentIndex++;
+      showSlide(currentIndex);
+    }, 5000);
+  </script>
+</body>
+</html>
