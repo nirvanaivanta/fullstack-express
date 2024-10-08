@@ -33,6 +33,9 @@ router.post('/add-product', async (req, res) => {
   }
 });
 
+// Simpan pesanan dalam array (sebaiknya gunakan database di aplikasi yang nyata)
+let orders = [];
+
 // Route untuk membeli produk
 router.post('/buy/:productId', async (req, res) => {
   const productId = req.params.productId; // Dapatkan productId dari parameter
@@ -59,12 +62,28 @@ router.post('/buy/:productId', async (req, res) => {
     product.stok -= quantity;
     await product.save(); // Simpan perubahan
 
+    // Tambahkan produk ke dalam pesanan
+    orders.push({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      quantity: quantity,
+    });
+
     res.status(200).json({ message: 'Pembelian berhasil' });
   } catch (err) {
     console.error('Error buying product:', err);
     res.status(500).json({ message: 'Terjadi kesalahan pada server' });
   }
 });
+
+// Route untuk menampilkan halaman pesanan
+router.get('/orders', (req, res) => {
+  res.render('orders', { orders, activePage: 'orders' }); 
+});
+
+
 
 // Beranda Route
 router.get('/beranda', async (req, res) => {

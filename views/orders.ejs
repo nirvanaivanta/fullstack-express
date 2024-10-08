@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pesanan</title>
+  <title>Pesanan - Marketplace Sederhana</title>
   <link rel="stylesheet" href="/style.css">
   <style>
     body {
@@ -17,13 +17,6 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
-      text-align: center;
-    }
-
-    h1 {
-      color: #333;
-      margin-bottom: 1.5rem;
-      font-size: 32px;
     }
 
     .order-card {
@@ -31,58 +24,59 @@
       padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .order-card img {
+      max-width: 100px;
+      height: auto;
+      border-radius: 4px;
+      margin-right: 1rem;
     }
 
     .order-card h2 {
-      font-size: 20px;
+      font-size: 18px;
       color: #333;
-      margin-bottom: 0.5rem;
+      margin: 0;
     }
 
     .order-card p {
       font-size: 14px;
       color: #666;
-      margin-bottom: 0.5rem;
+      margin: 0;
     }
 
-    .order-card p:last-child {
-      font-weight: bold;
-      color: #000;
-    }
-
-    a {
-      display: inline-block;
-      margin-top: 2rem;
-      padding: 10px 20px;
-      background-color: #4CAF50;
-      color: #fff;
-      text-decoration: none;
+    .order-status {
+      background-color: yellow;
+      padding: 5px 10px;
       border-radius: 4px;
-      font-size: 16px;
-      transition: background-color 0.3s ease;
-    }
-
-    a:hover {
-      background-color: #45a049;
+      font-weight: bold;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
 <body>
+  <%- include('navbar.ejs') %>
+
   <div class="container">
-    <h1>Pesanan Anda</h1>
+    <h2>Daftar Pesanan</h2>
     <% if (orders.length > 0) { %>
       <% orders.forEach(order => { %>
         <div class="order-card">
-          <h2><%= order.name %></h2>
-          <p>Harga: Rp <%= order.price.toLocaleString() %></p>
-          <p>Metode Pembayaran: <%= order.paymentMethod %></p>
+          <img src="<%= order.image %>" alt="<%= order.name %>">
+          <div>
+            <h2><%= order.name %></h2>
+            <p>Jumlah: <%= order.quantity %></p>
+            <p>Harga: Rp <%= order.price.toLocaleString() %></p>
+            <div class="order-status">Dalam pesanan</div>
+          </div>
         </div>
       <% }) %>
     <% } else { %>
       <p>Tidak ada pesanan.</p>
     <% } %>
-    <a href="/">Kembali ke Marketplace</a>
   </div>
 </body>
 </html>
