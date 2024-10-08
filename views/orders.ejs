@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesanan</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 1.5rem;
+      font-size: 32px;
+    }
+
+    .order-card {
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 1rem 0;
+    }
+
+    .order-card h2 {
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 0.5rem;
+    }
+
+    .order-card p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .order-card p:last-child {
+      font-weight: bold;
+      color: #000;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    a:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pesanan Anda</h1>
+    <% if (orders.length > 0) { %>
+      <% orders.forEach(order => { %>
+        <div class="order-card">
+          <h2><%= order.name %></h2>
+          <p>Harga: Rp <%= order.price.toLocaleString() %></p>
+          <p>Metode Pembayaran: <%= order.paymentMethod %></p>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>Tidak ada pesanan.</p>
+    <% } %>
+    <a href="/">Kembali ke Marketplace</a>
+  </div>
+</body>
+</html>
