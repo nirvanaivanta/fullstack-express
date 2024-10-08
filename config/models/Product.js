@@ -18,6 +18,11 @@ const Product = sequelize.define('product', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  stok: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+  },
 }, {
   timestamps: true, 
 });
