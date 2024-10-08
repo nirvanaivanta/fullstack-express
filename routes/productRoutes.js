@@ -23,15 +23,16 @@ router.post('/add-product', async (req, res) => {
     const { name, price, description, image } = req.body;
     
     try {
-      // Membuat produk baru dengan data dari form
-      await Product.create({ name, price, description, image });
-      // Redirect ke halaman utama setelah produk berhasil ditambahkan
-      res.redirect('/');
+        // Membuat produk baru dengan data dari form
+        await Product.create({ name, price, description, image });
+        // Redirect ke halaman utama setelah produk berhasil ditambahkan
+        res.redirect('/');
     } catch (err) {
-      console.error('Error adding product:', err);
-      res.status(500).send('Error adding product');
+        console.error('Error adding product:', err.message); // Log pesan kesalahan
+        res.status(500).send('Error adding product: ' + err.message); // Kirim pesan kesalahan
     }
-  });
+});
+
   
 
 module.exports = router;
