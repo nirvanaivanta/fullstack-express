@@ -6,7 +6,7 @@ const Product = require('../config/models/Product');
 router.get('/', async (req, res) => {
   try {
     let products = await Product.findAll();
-    res.render('index', { products, activePage: 'produk' }); 
+    res.render('beranda', { products, activePage: 'beranda' }); 
   } catch (err) {
     console.error('Error fetching products:', err);
     res.status(500).send('Error fetching products');
@@ -86,10 +86,10 @@ router.get('/orders', (req, res) => {
 
 
 // Beranda Route
-router.get('/beranda', async (req, res) => {
+router.get('/products', async (req, res) => {
   try {
     let products = await Product.findAll(); // Ambil data produk dari database
-    res.render('beranda', { products, activePage: 'beranda' }); // Kirim data produk ke beranda.ejs
+    res.render('index', { products, activePage: 'produk' }); // Kirim data produk ke beranda.ejs
   } catch (err) {
     console.error('Error fetching products:', err);
     res.status(500).send('Error fetching products');
