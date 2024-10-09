@@ -80,7 +80,7 @@ router.post('/buy/:productId', async (req, res) => {
 
 // Route untuk menampilkan halaman pesanan
 router.get('/orders', (req, res) => {
-  res.render('orders', { orders, activePage: 'orders' }); 
+  res.render('orders', { orders, activePage: 'pesanan' }); 
 });
 
 
