@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Marketplace Sederhana</title>
+  <title>Marketplace</title>
   <link rel="stylesheet" href="/style.css">
   <style>
     body {
@@ -17,29 +17,59 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
-      text-align: center;
     }
 
     h1 {
       color: #333;
       margin-bottom: 1.5rem;
       font-size: 32px;
+      text-align: center;
     }
 
-    a {
-      display: inline-block;
-      margin-bottom: 2rem;
-      padding: 10px 20px;
-      background-color: #f750c5;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 4px;
-      font-size: 16px;
-      transition: background-color 0.3s ease;
+    .cart-icon {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
     }
 
-    a:hover {
-      background-color: #f750c5;
+    .cart-icon img {
+      width: 40px;
+    }
+
+    /* Modal untuk menampilkan isi keranjang */
+    #cartModal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cart-modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #closeCartModal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #777;
     }
 
     .product-grid {
@@ -85,7 +115,8 @@
       color: #000;
     }
 
-    .buy-button {
+    .buy-button,
+    .cart-button {
       padding: 10px 20px;
       background-color: #f750c5;
       color: white;
@@ -94,13 +125,15 @@
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      margin-right: 10px;
     }
 
-    .buy-button:hover {
+    .buy-button:hover,
+    .cart-button:hover {
       background-color: #ff57f7;
     }
 
-    /* Modal */
+    /* Modal Buy */
     #buyModal {
       display: none;
       position: fixed;
@@ -130,7 +163,7 @@
       right: 10px;
       cursor: pointer;
       font-size: 20px;
-      color: #777; /* Ubah warna close button */
+      color: #777;
     }
 
     #buyForm {
@@ -157,21 +190,16 @@
     }
 
     #confirmBuy:hover {
-      background-color: #ff4ed3; /* Warna hover untuk tombol */
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
+      background-color: #ff4ed3;
     }
   </style>
 </head>
 <body>
   <%- include('navbar.ejs') %>
   <div class="container">
-    <!-- <h1>Marketplace</h1> -->
-    <!-- <a href="/add-product">Add New Product</a> -->
+    <div class="cart-icon">
+      <img src="https://cdn-icons-png.flaticon.com/512/107/107831.png" alt="Cart" id="cartIcon">
+    </div>
     <div class="product-grid">
       <% products.forEach(product => { %>
         <div class="card">
@@ -181,80 +209,163 @@
           <p>Harga: Rp <%= product.price.toLocaleString() %></p>
           <p>Stok: <%= product.stok %></p>
           <button class="buy-button" data-id="<%= product.id %>" data-price="<%= product.price %>">Buy</button>
-        </div>        
+          <button class="cart-button" data-id="<%= product.id %>" data-price="<%= product.price %>">Add to Cart</button>
+        </div>
       <% }) %>
     </div>
   </div>
 
- <!-- Modal Buy -->
-<div id="buyModal">
-  <div class="modal-content">
-    <span id="closeModal">&times;</span>
-    <h2>Buy Product</h2>
-    <form id="buyForm">
-      <label for="quantity">Jumlah:</label>
-      <input type="number" id="quantity" min="1" required />
-      <p>Total Harga: Rp <span id="totalPrice"></span></p>
-      <button type="submit" id="confirmBuy">Buy</button>
-    </form>
+  <!-- Modal Buy -->
+  <div id="buyModal">
+    <div class="modal-content">
+      <span id="closeModal">&times;</span>
+      <h2>Buy Product</h2>
+      <form id="buyForm">
+        <label for="quantity">Jumlah:</label>
+        <input type="number" id="quantity" min="1" required />
+        <p>Total Harga: Rp <span id="totalPrice"></span></p>
+        <button type="submit" id="confirmBuy">Buy</button>
+      </form>
+    </div>
   </div>
-</div>
 
+  <!-- Modal Cart -->
+  <div id="cartModal">
+    <div class="cart-modal-content">
+      <span id="closeCartModal">&times;</span>
+      <h2>Cart Items</h2>
+      <div id="cartItems"></div>
+      <button class="buy-button" id="checkoutCart">Checkout</button>
+    </div>
+  </div>
 
-    <script>
-      const buyButtons = document.querySelectorAll('.buy-button');
-      const buyModal = document.getElementById('buyModal');
-      const closeModal = document.getElementById('closeModal');
-      const quantityInput = document.getElementById('quantity');
-      const totalPriceDisplay = document.getElementById('totalPrice');
-      let selectedProductId;
-      let selectedProductPrice;
+  <script>
+    const buyButtons = document.querySelectorAll('.buy-button');
+    const cartButtons = document.querySelectorAll('.cart-button');
+    const buyModal = document.getElementById('buyModal');
+    const closeModal = document.getElementById('closeModal');
+    const quantityInput = document.getElementById('quantity');
+    const totalPriceDisplay = document.getElementById('totalPrice');
+    const cartIcon = document.getElementById('cartIcon');
+    const cartModal = document.getElementById('cartModal');
+    const closeCartModal = document.getElementById('closeCartModal');
+    const cartItemsContainer = document.getElementById('cartItems');
+    let cart = [];
 
-      buyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          selectedProductId = this.getAttribute('data-id');
-          selectedProductPrice = this.getAttribute('data-price');
-          buyModal.style.display = 'flex';
-        });
+    let selectedProductId;
+    let selectedProductPrice;
+
+    buyButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        selectedProductId = this.getAttribute('data-id');
+        selectedProductPrice = this.getAttribute('data-price');
+        buyModal.style.display = 'flex';
       });
+    });
 
-      closeModal.addEventListener('click', function() {
-        buyModal.style.display = 'none';
+    closeModal.addEventListener('click', function() {
+      buyModal.style.display = 'none';
+    });
+
+    quantityInput.addEventListener('input', function() {
+      const quantity = parseInt(this.value) || 0;
+      totalPriceDisplay.textContent = (selectedProductPrice * quantity).toLocaleString();
+    });
+
+    document.getElementById('confirmBuy').addEventListener('click', async function(event) {
+  event.preventDefault(); // Mencegah form submit
+  const quantity = parseInt(quantityInput.value) || 0;
+  if (quantity < 1) {
+    alert('Jumlah tidak valid');
+    return;
+  }
+
+  try {
+    const response = await fetch(`/buy/${selectedProductId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ quantity }),
+    });
+
+    if (response.ok) {
+      alert('Pembelian berhasil');
+      buyModal.style.display = 'none';
+
+      // Redirect ke halaman pesanan
+      window.location.href = '/orders';
+    } else {
+      alert('Pembelian gagal');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Terjadi kesalahan');
+  }
+});
+
+document.getElementById('checkoutCart').addEventListener('click', async function() {
+  if (cart.length === 0) {
+    alert('Keranjang kosong, tidak ada yang bisa dibeli.');
+    return;
+  }
+
+  try {
+    // Mengirim semua barang di keranjang ke server
+    const response = await fetch('/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ items: cart }),
+    });
+
+    if (response.ok) {
+      alert('Checkout berhasil');
+      cart = []; // Kosongkan keranjang setelah pembelian berhasil
+      cartModal.style.display = 'none'; // Tutup modal keranjang
+
+      // Redirect ke halaman pesanan setelah checkout sukses
+      window.location.href = '/orders';
+    } else {
+      alert('Checkout gagal');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Terjadi kesalahan saat melakukan checkout.');
+  }
+});
+
+
+    cartButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const productId = this.getAttribute('data-id');
+        const productPrice = this.getAttribute('data-price');
+        const product = { id: productId, price: productPrice };
+
+        cart.push(product);
+        alert('Added to Cart');
       });
+    });
 
-      quantityInput.addEventListener('input', function() {
-        const quantity = parseInt(this.value) || 0;
-        totalPriceDisplay.textContent = (selectedProductPrice * quantity).toLocaleString();
+    cartIcon.addEventListener('click', function() {
+      cartModal.style.display = 'flex';
+      renderCartItems();
+    });
+
+    closeCartModal.addEventListener('click', function() {
+      cartModal.style.display = 'none';
+    });
+
+    function renderCartItems() {
+      cartItemsContainer.innerHTML = '';
+
+      cart.forEach(item => {
+        const cartItem = document.createElement('div');
+        cartItem.textContent = `Product ID: ${item.id}, Price: Rp ${parseInt(item.price).toLocaleString()}`;
+        cartItemsContainer.appendChild(cartItem);
       });
-
-      document.getElementById('confirmBuy').addEventListener('click', async function(event) {
-        event.preventDefault(); // Mencegah form submit
-        const quantity = parseInt(quantityInput.value) || 0;
-        if (quantity < 1) {
-          alert('Jumlah tidak valid');
-          return;
-        }
-
-        try {
-          const response = await fetch(`/buy/${selectedProductId}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ quantity })
-          });
-
-          const data = await response.json();
-          alert(data.message);
-          if (response.ok) {
-            buyModal.style.display = 'none';
-            window.location.href = '/orders'; // Arahkan ke halaman pesanan setelah pembelian berhasil
-          }
-        } catch (error) {
-          alert('Terjadi kesalahan saat melakukan pembelian');
-          console.error('Error:', error);
-        }
-      });
+    }
   </script>
 </body>
 </html>

@@ -97,4 +97,26 @@ router.get('/products', async (req, res) => {
   }
 });
 
+router.post('/checkout', async (req, res) => {
+  const items = req.body.items;
+
+  try {
+    // Proses pembelian semua item di keranjang
+    for (const item of items) {
+      const productId = item.id;
+      const quantity = 1; // Sesuaikan jika ada quantity di keranjang
+      
+      // Logika pembelian produk per item
+      await processPurchase(productId, quantity);
+    }
+
+    // Kirim respons berhasil
+    res.status(200).json({ message: 'Checkout berhasil' });
+  } catch (error) {
+    console.error('Checkout Error:', error);
+    res.status(500).json({ message: 'Terjadi kesalahan saat checkout' });
+  }
+});
+
+
 module.exports = router;
