@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../config/models/Product');
+const Product = require('../config/models/Product'); 
+const Order = require('../config/models/Order'); 
 
 // Route untuk menampilkan produk
 router.get('/', async (req, res) => {
@@ -33,43 +34,39 @@ router.post('/add-product', async (req, res) => {
   }
 });
 
-// Simpan pesanan dalam array (sebaiknya gunakan database di aplikasi yang nyata)
-let orders = [];
-
-// Route untuk membeli produk
+// Membeli produk
 router.post('/buy/:productId', async (req, res) => {
-  const productId = req.params.productId; // Dapatkan productId dari parameter
-  const { quantity } = req.body; // Ambil quantity dari body
+  const productId = req.params.productId;
+  const { quantity } = req.body;
 
-  // Validasi quantity
   if (quantity < 1) {
     return res.status(400).json({ message: 'Jumlah tidak valid' });
   }
 
   try {
-    // Cek stok produk dari database
     const product = await Product.findOne({ where: { id: productId } });
     if (!product) {
       return res.status(404).json({ message: 'Produk tidak ditemukan' });
     }
 
-    // Cek apakah stok cukup
     if (product.stok < quantity) {
       return res.status(400).json({ message: 'Stok tidak mencukupi' });
     }
 
     // Kurangi stok produk
     product.stok -= quantity;
-    await product.save(); // Simpan perubahan
+    await product.save();
 
-    // Tambahkan produk ke dalam pesanan
-    orders.push({
-      id: product.id,
+    // Simpan pesanan ke database
+    await Order.create({
+      product_id: product.id,
       name: product.name,
       image: product.image,
       price: product.price,
       quantity: quantity,
+      description: product.description  
     });
+    
 
     res.status(200).json({ message: 'Pembelian berhasil' });
   } catch (err) {
@@ -79,11 +76,15 @@ router.post('/buy/:productId', async (req, res) => {
 });
 
 // Route untuk menampilkan halaman pesanan
-router.get('/orders', (req, res) => {
-  res.render('orders', { orders, activePage: 'pesanan' }); 
+router.get('/orders', async (req, res) => {
+  try {
+    const orders = await Order.findAll(); // Ambil data pesanan dari database
+    res.render('orders', { orders, activePage: 'pesanan' });
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    res.status(500).send('Error fetching orders');
+  }
 });
-
-
 
 // Beranda Route
 router.get('/products', async (req, res) => {

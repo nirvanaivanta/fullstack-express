@@ -201,60 +201,60 @@
 </div>
 
 
-  <script>
-    const buyButtons = document.querySelectorAll('.buy-button');
-    const buyModal = document.getElementById('buyModal');
-    const closeModal = document.getElementById('closeModal');
-    const quantityInput = document.getElementById('quantity');
-    const totalPriceDisplay = document.getElementById('totalPrice');
-    let selectedProductId;
-    let selectedProductPrice;
+    <script>
+      const buyButtons = document.querySelectorAll('.buy-button');
+      const buyModal = document.getElementById('buyModal');
+      const closeModal = document.getElementById('closeModal');
+      const quantityInput = document.getElementById('quantity');
+      const totalPriceDisplay = document.getElementById('totalPrice');
+      let selectedProductId;
+      let selectedProductPrice;
 
-    buyButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        selectedProductId = this.getAttribute('data-id');
-        selectedProductPrice = this.getAttribute('data-price');
-        buyModal.style.display = 'flex';
+      buyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          selectedProductId = this.getAttribute('data-id');
+          selectedProductPrice = this.getAttribute('data-price');
+          buyModal.style.display = 'flex';
+        });
       });
-    });
 
-    closeModal.addEventListener('click', function() {
-      buyModal.style.display = 'none';
-    });
+      closeModal.addEventListener('click', function() {
+        buyModal.style.display = 'none';
+      });
 
-    quantityInput.addEventListener('input', function() {
-      const quantity = parseInt(this.value) || 0;
-      totalPriceDisplay.textContent = (selectedProductPrice * quantity).toLocaleString();
-    });
+      quantityInput.addEventListener('input', function() {
+        const quantity = parseInt(this.value) || 0;
+        totalPriceDisplay.textContent = (selectedProductPrice * quantity).toLocaleString();
+      });
 
-    document.getElementById('confirmBuy').addEventListener('click', async function(event) {
-  event.preventDefault(); // Mencegah form submit
-  const quantity = parseInt(quantityInput.value) || 0;
-  if (quantity < 1) {
-    alert('Jumlah tidak valid');
-    return;
-  }
+      document.getElementById('confirmBuy').addEventListener('click', async function(event) {
+        event.preventDefault(); // Mencegah form submit
+        const quantity = parseInt(quantityInput.value) || 0;
+        if (quantity < 1) {
+          alert('Jumlah tidak valid');
+          return;
+        }
 
-  try {
-    const response = await fetch(`/buy/${selectedProductId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ quantity })
-    });
+        try {
+          const response = await fetch(`/buy/${selectedProductId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity })
+          });
 
-    const data = await response.json();
-    alert(data.message);
-    if (response.ok) {
-      buyModal.style.display = 'none';
-      location.reload(); 
-    }
-  } catch (error) {
-    alert('Terjadi kesalahan saat melakukan pembelian');
-    console.error('Error:', error);
-  }
-});
- </script>
+          const data = await response.json();
+          alert(data.message);
+          if (response.ok) {
+            buyModal.style.display = 'none';
+            window.location.href = '/orders'; // Arahkan ke halaman pesanan setelah pembelian berhasil
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan saat melakukan pembelian');
+          console.error('Error:', error);
+        }
+      });
+  </script>
 </body>
 </html>
